@@ -1,0 +1,86 @@
+1) Preparing the data.
+import numpy as np
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+
+# Load the dataset (features and heat of formation values)
+# For demonstration, we'll generate synthetic data
+# In practice, you would load your data from a file or database
+num_samples = 1000
+num_features = 20  # Assume each benzene derivative is represented by 20 features
+
+np.random.seed(42)
+X = np.random.rand(num_samples, num_features)
+y = np.random.rand(num_samples) * 100  # Synthetic heat of formation values
+
+# Split the data into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Standardize the features
+scaler = StandardScaler()
+X_train = scaler.fit_transform(X_train)
+X_test = scaler.transform(X_test)
+
+
+2) Building the neural network model 
+
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense, Dropout
+
+# Define the model
+model = Sequential()
+model.add(Dense(128, input_dim=num_features, activation='relu'))
+model.add(Dropout(0.3))
+model.add(Dense(64, activation='relu'))
+model.add(Dropout(0.3))
+model.add(Dense(1))  # Output layer
+
+# Compile the model
+model.compile(optimizer='adam', loss='mean_squared_error', metrics=['mae'])
+
+# Train the model
+history = model.fit(X_train, y_train, epochs=100, batch_size=32, validation_split=0.2)
+
+3) evaluting the model
+
+# Evaluate the model
+loss, mae = model.evaluate(X_test, y_test)
+print(f'Test MAE: {mae:.3f}')
+
+# Make predictions
+predictions = model.predict(X_test)
+
+# Display some predictions and their corresponding true values
+for i in range(10):
+    print(f'Predicted: {predictions[i][0]:.2f}, True: {y_test[i]:.2f}')
+
+4) visualizing the results 
+
+import matplotlib.pyplot as plt
+
+# Plot training & validation loss values
+plt.figure(figsize=(10, 5))
+plt.plot(history.history['loss'], label='Train')
+plt.plot(history.history['val_loss'], label='Validation')
+plt.title('Model Loss')
+plt.xlabel('Epoch')
+plt.ylabel('Loss')
+plt.legend()
+plt.show()
+
+# Plot predicted vs true values for test set
+plt.figure(figsize=(10, 5))
+plt.scatter(y_test, predictions, alpha=0.5)
+plt.plot([0, 100], [0, 100], 'r--')
+plt.xlabel('True Values')
+plt.ylabel('Predicted Values')
+plt.title('Predicted vs True Heat of Formation')
+plt.show()
+
+Summary  
+Preparing the data: Loading, splitting, and standardizing the data.
+Building the model: Creating and compiling a feedforward neural network.
+Training the model: Training the model on the training data.
+Evaluating the model: Evaluating the model's performance on the test data.
+Visualizing the results: Plotting training loss and predicted vs. true values.
